@@ -4,7 +4,7 @@
 |---|---|---|
 | GB0 — the spec | ✅ | the repository's first commit and GB-1 |
 | GB1 — the site on Workers | ✅ | GB-2 |
-| GB2 — a baseline | planned | GB-3 |
+| GB2 — a baseline | ✅ | GB-3, tagged `baseline-v1` |
 
 ## Departures from the upstream template
 

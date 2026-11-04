@@ -9,7 +9,7 @@ somebody else's site in one landing.**
 
 | | |
 |---|---|
-| Status | In progress — GB1 on main: the site runs on Workers |
+| Status | ✅ Shipped (`baseline-v1`) — proven offline in Baseline CI; not yet live (risk GB-A) |
 | Upstream | [vercel/examples](https://github.com/vercel/examples) `framework-boilerplates/gatsby` (MIT), at `de86723` (2026-10-16; the folder last changed in `cb2643e`): Gatsby's minimal starter on Gatsby 5 |
 | Reference | [angular-boilerplate](https://github.com/sourceplane/angular-boilerplate) — the same `vercel/examples` framework boilerplate, a static build behind one Worker, its tests and its bootstrap; [astro-boilerplate](https://github.com/sourceplane/astro-boilerplate) — the same `<framework>-boilerplate` identity and rename rules |
 | Key | `GB` |
