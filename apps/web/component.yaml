@@ -1,0 +1,91 @@
+apiVersion: sourceplane.io/v1
+kind: Component
+metadata:
+  name: web
+  description: The Gatsby site (Gatsby 5, built fully static and served as Cloudflare Workers + Static Assets behind one Worker, the template's 404 page answering a missing page, per environment)
+spec:
+  type: cloudflare-workers-assets-turbo
+  lifecycle: production
+  owner: platform
+  # Its pages, attached to it in the workspace's catalog: what the Docs
+  # library shows for it, and what the catalog's docs and runbook checks read.
+  # Generated from what this manifest and its sources declare.
+  docs:
+    overview: docs/overview.md
+    pages:
+      - { path: docs/architecture.md, role: architecture, title: Architecture }
+      - { path: docs/runbook.md, role: runbook, title: Runbook }
+  # `app`, not `web`: a domain and a component share one name space in the
+  # catalog, and a domain called `web` hid this component from it.
+  domain: app
+  path: apps/web
+  # Its own lane per environment: the app's build is the longest job in the
+  # plan, and a shared lane would wait on it.
+  lane: isolated
+  subscribe:
+    environments:
+      - name: dev
+        profile: verify
+      - name: stage
+        profile: verify
+        profileRules:
+          - profile: deploy
+            when:
+              triggerRef: github-push-main
+      - name: prod
+        profile: verify
+        profileRules:
+          - profile: deploy
+            when:
+              triggerRef: github-push-main
+  parameters:
+    nodeVersion: "22"
+    pnpmVersion: "10.12.1"
+
+    workspaceDir: ../..
+    appDir: .
+
+    turboFilter: "@app/web"
+    # The config the dry run and the deploy hand to wrangler: the Worker
+    # (worker/index.ts) and the static build in public/ as its assets, with
+    # the template's 404 page for a missing page. The site builds fully
+    # static, so there is no adapter and no generated config — this committed
+    # file is the one wrangler deploys.
+    wranglerConfig: wrangler.jsonc
+
+    # `gatsby build` writes an HTML file per page (index.html, 404.html), the
+    # page data Gatsby's client reads as it navigates and the hashed
+    # JavaScript chunks to public/. The Worker is a source file wrangler
+    # bundles at deploy; the lane checks it exists after the build like any
+    # entry.
+    workerEntrypoint: worker/index.ts
+    assetsDir: public
+
+    # Per-env worker name: gatsby-boilerplate-web-{dev,stage,prod}.
+    workerName: gatsby-boilerplate-web
+    environmentAwareWorkerName: true
+
+    # The account's workers.dev subdomain; exported to the smoke step as
+    # ${WORKERS_DEV_SUBDOMAIN} and used to build ${DEPLOYED_URL}.
+    workersDevSubdomain: your-workers-subdomain
+
+    installCommand: pnpm install --frozen-lockfile
+    # The site's origin is baked into the build (gatsby-config.js's
+    # siteMetadata.siteUrl, what a sitemap, robots or canonical plugin
+    # reads): the environment's SITE_URL when intent.yaml sets one (a custom
+    # domain), else its workers.dev address. turbo passes GATSBY_* variables
+    # to the build and keys its cache on them.
+    buildCommand: GATSBY_SITE_URL="${SITE_URL:-https://gatsby-boilerplate-web-${ORUN_ENVIRONMENT}.your-workers-subdomain.workers.dev}" pnpm exec turbo run build --filter=@app/web
+
+    # Smoke: the home page is the template's (its title and its
+    # congratulations), the app-data file Gatsby's client fetches first is
+    # served as JSON with the build's compilation hash, the home page's own
+    # page data names its page component, and a missing page is the
+    # template's 404 page with a 404 status. Each response is buffered before
+    # grep so an early match cannot SIGPIPE curl.
+    smokeCommand: "html=$(curl -sfL \"${DEPLOYED_URL}/\") && echo \"${html}\" | grep -q '>Home Page</title>' && echo \"${html}\" | grep -q 'you just made a Gatsby site' && app=$(curl -sfL \"${DEPLOYED_URL}/page-data/app-data.json\") && echo \"${app}\" | grep -q 'webpackCompilationHash' && data=$(curl -sfL \"${DEPLOYED_URL}/page-data/index/page-data.json\") && echo \"${data}\" | grep -q 'component---src-pages-index-js' && missing=$(curl -s -w '\\n%{http_code}' \"${DEPLOYED_URL}/no-such-page/\") && echo \"${missing}\" | tail -n 1 | grep -q '^404$' && echo \"${missing}\" | grep -q 'Page not found'"
+  labels:
+    team: platform
+    layer: delivery
+    surface: web
+    runtime: cloudflare
