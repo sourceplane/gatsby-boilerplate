@@ -1,0 +1,18 @@
+apiVersion: orun.io/v1
+kind: TaskContract
+metadata:
+  name: GB-2
+  title: "The site on Workers"
+spec:
+  goal: Vercel's Gatsby 5 Boilerplate runs on Cloudflare Workers + Static Assets — built static by gatsby build, served as assets behind one Worker with the template's 404 page for a missing page — with its tests, and its README saying how it maps to Vercel
+  affects:
+    - apps/web
+    - tests/web
+    - pnpm-lock.yaml
+    - pnpm-workspace.yaml
+    - README.md
+    - .gitignore
+  doneWhen:
+    - pnpm typecheck, lint, test and build are green
+    - wrangler dev serves the home page, its chunks and the page data, the 404 page at /404 and /404/, and a missing page, chunk or page-data file as the 404 page with a 404 status
+  gates: []

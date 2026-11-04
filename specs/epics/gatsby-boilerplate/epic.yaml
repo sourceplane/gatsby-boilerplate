@@ -1,0 +1,30 @@
+# The epic's declaration. metadata.name equals the directory name; metadata.key
+# is the task-key prefix this epic reserves (NG → GB-1, GB-2, …). Owner, target
+# date and health are the platform's — never written here.
+apiVersion: orun.io/v1
+kind: Epic
+metadata:
+  name: gatsby-boilerplate
+  key: NG
+spec:
+  title: "Vercel's Gatsby 5 Boilerplate on Cloudflare Workers"
+  summary: "Vercel's Gatsby example — Gatsby's minimal starter: the welcome page with its documentation link and five guides, and the 404 page — built fully static by gatsby build and served as Cloudflare Workers Static Assets behind one small Worker, a missing page answered by the template's 404 page with a 404 status and the site's siteUrl its own environment's address, inside the Cirrus baseline's repository conventions, and becomes an Orun baseline that takes a new Gatsby site from nothing to live on stage and prod in one landing."
+  state: started
+  milestones:
+    - name: "GB0 — the spec"
+      exitCriteria:
+        - "the repository is born with its intent, CI, tooling and spec index, and this doc set and the task contracts are on main"
+      tasks: [GB-1]
+    - name: "GB1 — the site on Workers"
+      exitCriteria:
+        - "apps/web is the upstream template on Gatsby 5, built static by gatsby build, with one Worker in front of public/ as Workers Static Assets"
+        - "`pnpm typecheck`, `pnpm lint`, `pnpm test` (tests/web, over the sources and the built site) and `pnpm build` are green"
+        - "`wrangler dev` serves the home page, its chunks and the page data, the 404 page at /404 and /404/, and answers a missing page, chunk or page-data file with the template's 404 page and a 404 status"
+        - "the README says how to run, test, preview and deploy it, and how every Vercel piece maps to Cloudflare"
+      tasks: [GB-2]
+    - name: "GB2 — a baseline"
+      exitCriteria:
+        - "blueprint.yaml (the console card) and repo-blueprint.yaml (the build) take a new Gatsby site from nothing to live on stage and prod in one landing, then record it"
+        - "a site built from it carries the site only, renamed throughout to its own name, repository and Worker, with the framework's own names intact"
+        - "Baseline CI is green: contract tests, generated component docs, the blueprint read by the pinned orun, the leak gate, the offline bootstrap and the end-to-end tier"
+      tasks: [GB-3]
