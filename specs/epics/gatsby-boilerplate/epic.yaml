@@ -9,7 +9,7 @@ metadata:
 spec:
   title: "Vercel's Gatsby 5 Boilerplate on Cloudflare Workers"
   summary: "Vercel's Gatsby example — Gatsby's minimal starter: the welcome page with its documentation link and five guides, and the 404 page — built fully static by gatsby build and served as Cloudflare Workers Static Assets behind one small Worker, a missing page answered by the template's 404 page with a 404 status and the site's siteUrl its own environment's address, inside the Cirrus baseline's repository conventions, and becomes an Orun baseline that takes a new Gatsby site from nothing to live on stage and prod in one landing."
-  state: started
+  state: completed
   milestones:
     - name: "GB0 — the spec"
       exitCriteria:

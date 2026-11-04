@@ -2,9 +2,10 @@
 
 Vercel's [Gatsby 5 Boilerplate](https://github.com/vercel/examples/tree/main/framework-boilerplates/gatsby)
 template — Gatsby's minimal starter: the welcome page with its documentation
-links and the 404 page — running on **Cloudflare Workers + Static Assets**, deployed by
-[Orun](https://github.com/sourceplane/orun) to stage and prod on every merge.
-Packaging it as an Orun baseline is the next milestone (GB2).
+links and the 404 page — running on **Cloudflare Workers + Static Assets**,
+and packaged as an **Orun baseline**: one command takes a new Gatsby site
+from nothing to live on stage and prod, in its own repository, under its own
+name.
 
 Gatsby builds fully static: `gatsby build` writes an HTML file for every page
 (`index.html`, `404.html`), the page data Gatsby's client reads as it
@@ -13,8 +14,55 @@ uploaded as Workers Static Assets with one small Worker in front, and a
 request that matches no file — a missing page, chunk or page-data file — is
 answered with the template's 404 page and a 404 status. The pages do not
 change; the site's name is one literal in `gatsby-config.js`, and its
-`siteUrl` is the environment's own address instead of Vercel's demo host. See [`specs/epics/gatsby-boilerplate`](specs/epics/gatsby-boilerplate/README.md)
+`siteUrl` is the environment's own address instead of Vercel's demo host.
+What the baseline adds is everything needed to make a copy of it somebody
+else's — built the way [cirrus-baseline](https://github.com/sourceplane/cirrus-baseline)
+is. See [`specs/epics/gatsby-boilerplate`](specs/epics/gatsby-boilerplate/README.md)
 for the design, the milestones and the as-built status.
+
+## Instantiating a site
+
+```bash
+git clone --depth 1 --branch <baseline-tag> https://github.com/sourceplane/gatsby-boilerplate
+cd gatsby-boilerplate
+orun new --blueprint repo-blueprint.yaml --out ~/sites/acme-site --run-hooks --resume \
+  --set reponame=acme-site --set productname="Acme Site" \
+  --set githuborg=acme-inc --set subdomain=<workers-dev-subdomain>
+```
+
+Or, once the platform's registry lists it, from the Orun console (Baselines →
+`gatsby-boilerplate` → Build). Two phases — `01-product` (the repository
+created, then the whole site in one pull request, deployed to stage and prod
+and smoke-tested) and `03-docs` (the live deployment recorded) — each landing
+one pull request in the new repository. **[BOOTSTRAP.md](BOOTSTRAP.md)** is
+the operator guide; [docs/phases/](docs/phases/README.md) has a page per
+phase.
+
+The new repository receives the **site only** — the site and its tests, its
+CI, its tooling, a README of its own and its operating contract — renamed
+throughout to the site's name, repository and Cloudflare Worker. None of this
+repository's machinery ships.
+
+| What makes it a baseline | Where |
+|---|---|
+| The console card (inputs, secrets, programme) | `blueprint.yaml` |
+| The build document (modules, phases, hooks) | `repo-blueprint.yaml` |
+| This tree's identity, and the bootstrap's task contracts | `.baseline/` |
+| The rename engine | `tooling/rebrand/rebrand.mjs` |
+| The bootstrap's helpers (deferrals, redeploy marker, work-tree strip) | `tooling/bootstrap/` |
+| The deployment-record renderer | `hooks/render-deployment-docs.sh` |
+| The site's README and context pack | `.baseline/product/README.md`, `ai/context/` |
+| The baseline's tests: contract, leak, offline bootstrap, end to end | `testing/`, `.github/workflows/baseline.yml` |
+| Cutting a `baseline-vN` tag | `.github/workflows/tag.yml` |
+
+The framework's name is not the site's: Gatsby's package (`gatsby`), its CLI
+(`gatsby build`) and its config file (`gatsby-config.js`) never spell this
+repository's slug, so the rename engine has nothing of the framework's to
+mask. The site's display name is one literal, `SITE_NAME` in
+`apps/web/gatsby-config.js` (gatsby-starter-minimal's own title, "My Gatsby
+Site"), which Gatsby hands every page and plugin as `siteMetadata.title`; the
+placement tier fails on any placed site that spells it anywhere else, or
+whose 404 page no longer imports `Link` from `gatsby`.
 
 ## What is here (the site)
 
@@ -61,6 +109,8 @@ Gatsby's telemetry is off in every script (`GATSBY_TELEMETRY_DISABLED=1`).
 | Workflow | What it runs | Ships to a site |
 |---|---|---|
 | `ci.yml` | the Orun pipeline, and the only workflow a site carries: `orun plan --changed`, then one job per lane. A pull request runs the verify lanes (the site built and dry-deployed per environment; the tests' `quick-check` lane installs and checks the package, it does not run them), except the bootstrap's own landings (`orun/BASE-*`), where `plan` alone is the check; a merge deploys stage → prod. It plans nothing while `intent.yaml` names the placeholder workspace `ws_CHANGE_ME`, as this repository does. A manual run (Orunbase's Deploy button, or Run workflow on `main`) plans the environment and components it names under the push-to-main trigger, so they deploy as a merge deploys them | yes |
+| `baseline.yml` | the baseline's own tiers: contract tests, the blueprint read by the pinned orun, the leak gate, the offline bootstrap, the site built in a staged job tree, dry-deployed and served | no |
+| `tag.yml` | cuts a `baseline-vN` tag (manual) | no |
 
 ## Credits
 
