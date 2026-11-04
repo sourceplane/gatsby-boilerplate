@@ -1,0 +1,13 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "tests/*"
+  - "tooling/*"
+
+# pnpm 10 blocks dependency build scripts unless allow-listed; wrangler's
+# workerd and esbuild need theirs to verify their platform binaries. Gatsby's
+# native modules (lmdb, msgpackr-extract) load prebuilt binaries and need no
+# build script; its own postinstall scripts only print notices.
+onlyBuiltDependencies:
+  - esbuild
+  - workerd
