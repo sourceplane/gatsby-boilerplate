@@ -1,0 +1,28 @@
+{
+  "name": "@app/web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "develop": "GATSBY_TELEMETRY_DISABLED=1 gatsby develop",
+    "start": "GATSBY_TELEMETRY_DISABLED=1 gatsby develop",
+    "dev": "GATSBY_TELEMETRY_DISABLED=1 gatsby develop --port 3000",
+    "build": "GATSBY_TELEMETRY_DISABLED=1 gatsby build",
+    "serve": "GATSBY_TELEMETRY_DISABLED=1 gatsby serve",
+    "clean": "gatsby clean",
+    "preview": "wrangler dev",
+    "typecheck": "tsc --noEmit -p tsconfig.worker.json",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "gatsby": "^5.16.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@app/eslint-config": "workspace:*",
+    "@app/tsconfig": "workspace:*",
+    "eslint": "^9.27.0",
+    "typescript": "^5.8.3",
+    "wrangler": "^4.151.0"
+  }
+}

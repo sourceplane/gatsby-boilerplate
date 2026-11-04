@@ -1,0 +1,21 @@
+// The Worker and the static site `gatsby build` emits (public/). Gatsby
+// writes a real HTML file for every page, so a request that matches no file
+// is a missing page: the assets answer it with the template's 404 page
+// (public/404.html) and a 404 status (`404-page`). Page addresses are
+// folders (`/about/` is about/index.html), Gatsby 5's default trailing
+// slash, which `auto-trailing-slash` serves and redirects to (`/about` →
+// `/about/`, `/index.html` → `/`).
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "gatsby-boilerplate-web",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  },
+  "observability": { "enabled": true }
+}
